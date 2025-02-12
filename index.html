@@ -1,0 +1,129 @@
+<html>
+  <head>
+    <!-- Menambahkan Bootstrap melalui CDN -->
+    <link 
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" 
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="apps"></div>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/jsx">
+      // Komponen untuk menampilkan tiap tugas
+      function TodoItem({ task, onToggle, onEdit, onDelete }) {
+        return (
+          <div className="d-flex align-items-center mb-2">
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => onToggle(task.id)}
+              className="mr-3"
+            />
+            <span
+              style={{ textDecoration: task.completed ? 'line-through' : '' }}
+              className="flex-grow-1"
+            >
+              {task.text}
+            </span>
+            <button onClick={() => onEdit(task.id)} className="btn btn-warning btn-sm ml-2">Edit</button>
+            <button onClick={() => onDelete(task.id)} className="btn btn-danger btn-sm ml-2">Delete</button>
+          </div>
+        );
+      }
+
+      // Komponen utama untuk daftar tugas
+      function TodoList() {
+        const [tasks, setTasks] = React.useState([]);
+        const [newTask, setNewTask] = React.useState("");
+        const [editingTaskId, setEditingTaskId] = React.useState(null);
+        const [editingText, setEditingText] = React.useState("");
+
+        // Fungsi untuk menambah tugas
+        const addTask = () => {
+          if (newTask.trim() === "") return;
+          setTasks([...tasks, { id: Date.now(), text: newTask, completed: false }]);
+          setNewTask("");
+        };
+
+        // Fungsi untuk menandai tugas selesai/tidak
+        const toggleTask = (id) => {
+          setTasks(tasks.map(task =>
+            task.id === id ? { ...task, completed: !task.completed } : task
+          ));
+        };
+
+        // Fungsi untuk mengedit tugas
+        const editTask = (id) => {
+          const task = tasks.find(t => t.id === id);
+          setEditingTaskId(id);
+          setEditingText(task.text);
+        };
+
+        // Fungsi untuk menyimpan perubahan edit
+        const saveEdit = () => {
+          setTasks(tasks.map(task =>
+            task.id === editingTaskId ? { ...task, text: editingText } : task
+          ));
+          setEditingTaskId(null);
+          setEditingText("");
+        };
+
+        // Fungsi untuk menghapus tugas
+        const deleteTask = (id) => {
+          setTasks(tasks.filter(task => task.id !== id));
+        };
+
+        return (
+          <div className="container mt-4">
+            <h1 className="text-center mb-4">Website Tugas Sekolah</h1>
+            <div className="input-group mb-3">
+              <input
+                type="text"
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                placeholder="Tambah Tugas Sekolah"
+                className="form-control"
+              />
+              <div className="input-group-append">
+                <button onClick={addTask} className="btn btn-primary">Tambah</button>
+              </div>
+            </div>
+
+            {editingTaskId && (
+              <div className="input-group mb-3">
+                <input
+                  type="text"
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  className="form-control"
+                />
+                <div className="input-group-append">
+                  <button onClick={saveEdit} className="btn btn-success">Simpan</button>
+                </div>
+              </div>
+            )}
+
+            <div>
+              {tasks.map((task) => (
+                <TodoItem
+                  key={task.id}
+                  task={task}
+                  onToggle={toggleTask}
+                  onEdit={editTask}
+                  onDelete={deleteTask}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      // Render aplikasi
+      ReactDOM.render(<TodoList />, document.getElementById('apps'));
+    </script>
+  </body>
+</html>
